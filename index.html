@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Private searchable fleet roster for Absolute Transportation."
+    />
+    <title>Absolute Fleet Roster</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#roster">Skip to fleet roster</a>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img
+            src="./assets/absolute-wordmark.png"
+            alt="Absolute Transportation"
+          />
+          <span class="product-name">Fleet roster</span>
+        </div>
+        <div class="top-actions">
+          <time class="top-date" datetime="2026-10-13">Oct 13, 2026</time>
+          <button class="button button-quiet" id="printButton" type="button">
+            Print
+          </button>
+          <button class="button button-quiet" id="exportButton" type="button">
+            Export CSV
+          </button>
+          <button class="button button-primary" id="addButton" type="button">
+            Add vehicle
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="pageTitle">
+          <img
+            class="hero-art"
+            src="./assets/route-field.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <div class="intro-content">
+            <p class="kicker">Operations / fleet</p>
+            <h1 id="pageTitle">
+              Every vehicle.<br /><span>One clear view.</span>
+            </h1>
+            <p class="intro-copy">
+              Search the complete photographed roster by plate, vehicle,
+              ownership, driver, or garage status. Browse by category when you
+              need a specific fleet type.
+            </p>
+          </div>
+          <p class="hero-signoff" aria-hidden="true">Keep people<br />moving</p>
+          <section class="summary" aria-label="Fleet summary">
+            <div class="metric">
+              <strong id="totalMetric">50</strong><span>Total vehicles</span>
+            </div>
+            <div class="metric">
+              <strong id="assignedMetric">0</strong><span>Assigned</span>
+            </div>
+            <div class="metric">
+              <strong id="garageMetric">0</strong><span>Garage / repairs</span>
+            </div>
+            <div class="metric">
+              <strong id="reviewMetric">0</strong><span>Needs review</span>
+            </div>
+          </section>
+          <div class="hero-location" aria-hidden="true">North Haven · CT</div>
+        </section>
+
+        <section class="workspace" id="roster" aria-labelledby="rosterTitle">
+          <div class="workspace-heading reveal-block">
+            <div>
+              <p class="kicker">Working copy</p>
+              <h2 id="rosterTitle">Vehicle roster</h2>
+            </div>
+            <p id="resultCount" class="result-count" aria-live="polite"></p>
+          </div>
+
+          <nav
+            class="category-nav"
+            aria-label="Browse vehicles by category"
+            id="categoryNav"
+          ></nav>
+
+          <div class="controls" role="search">
+            <label class="search-field">
+              <span class="sr-only">Search vehicles</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search plate, driver, category, vehicle…"
+                autocomplete="off"
+              />
+              <kbd>⌘ K</kbd>
+            </label>
+            <label
+              ><span>Ownership</span
+              ><select id="ownerFilter">
+                <option value="">All ownership</option>
+              </select></label
+            >
+            <label
+              ><span>Make</span
+              ><select id="makeFilter">
+                <option value="">All makes</option>
+              </select></label
+            >
+            <label
+              ><span>Status</span
+              ><select id="statusFilter">
+                <option value="">All statuses</option>
+              </select></label
+            >
+            <label
+              ><span>Sort</span
+              ><select id="sortSelect">
+                <option value="year-desc">Newest first</option>
+                <option value="year-asc">Oldest first</option>
+                <option value="plate">Plate number</option>
+                <option value="assignment">Assignment</option>
+                <option value="owner">Ownership</option>
+              </select></label
+            >
+            <button class="clear-button" id="clearButton" type="button">
+              Clear filters
+            </button>
+          </div>
+
+          <div class="table-wrap">
+            <table aria-label="Searchable fleet roster">
+              <thead>
+                <tr>
+                  <th scope="col">Vehicle</th>
+                  <th scope="col">Plate / no.</th>
+                  <th scope="col">Ownership</th>
+                  <th scope="col">Assignment</th>
+                  <th scope="col">Status</th>
+                  <th scope="col"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="card-list" id="cardList"></div>
+            <div class="empty-state" id="emptyState" hidden>
+              <strong>No matching vehicles</strong>
+              <p>Try clearing a filter or using a shorter search term.</p>
+              <button class="button button-quiet" type="button" data-clear>
+                Clear filters
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="source-note">
+          <div>
+            <p class="kicker">Source integrity</p>
+            <h2>The paper stays attached.</h2>
+          </div>
+          <p>
+            Every imported row links back to one of the ten supplied
+            photographs. Entries with unclear spelling, a correction, or an
+            incomplete field are marked <strong>Review</strong>. Browser edits
+            are stored only on this device.
+          </p>
+          <button class="text-button" id="resetButton" type="button">
+            Reset working copy to source
+          </button>
+        </section>
+      </main>
+    </div>
+
+    <aside
+      class="drawer"
+      id="detailDrawer"
+      aria-hidden="true"
+      aria-labelledby="drawerTitle"
+    >
+      <div class="drawer-backdrop" data-close-drawer></div>
+      <div class="drawer-panel" role="dialog" aria-modal="true">
+        <button
+          class="icon-button drawer-close"
+          type="button"
+          data-close-drawer
+          aria-label="Close vehicle details"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <div id="drawerContent"></div>
+      </div>
+    </aside>
+
+    <dialog id="recordDialog">
+      <form method="dialog" id="recordForm">
+        <div class="dialog-head">
+          <div>
+            <p class="kicker">Working copy</p>
+            <h2 id="dialogTitle">Add vehicle</h2>
+          </div>
+          <button
+            class="icon-button"
+            value="cancel"
+            aria-label="Close dialog"
+            formnovalidate
+          >
+            ×
+          </button>
+        </div>
+        <input type="hidden" name="id" />
+        <div class="form-grid">
+          <label><span>Ownership</span><input name="owner" required /></label>
+          <label
+            ><span>Year</span
+            ><input name="year" type="number" min="1900" max="2100" required
+          /></label>
+          <label><span>Make</span><input name="make" required /></label>
+          <label><span>Model</span><input name="model" required /></label>
+          <label
+            ><span>Plate / vehicle number</span><input name="plate" required
+          /></label>
+          <label><span>Assignment</span><input name="assignment" /></label>
+          <label
+            ><span>Vehicle category</span
+            ><select name="category" required>
+              <option>Sedan</option>
+              <option>SUV / crossover</option>
+              <option>Minivan</option>
+              <option>Passenger van</option>
+              <option>Accessible</option>
+              <option>Limousine</option>
+              <option>Electric</option>
+            </select></label
+          >
+          <label
+            ><span>Status</span
+            ><select name="status" required>
+              <option>Assigned</option>
+              <option>Garage</option>
+              <option>Repairs</option>
+              <option>Unassigned</option>
+              <option>Inactive</option>
+            </select></label
+          >
+          <label
+            ><span>Source photo</span
+            ><input name="source" type="number" min="1" max="10"
+          /></label>
+          <label class="full"
+            ><span>Notes</span><textarea name="note" rows="3"></textarea>
+          </label>
+          <label class="check-row full"
+            ><input name="review" type="checkbox" />
+            <span>Flag this record for review</span></label
+          >
+        </div>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel" formnovalidate>
+            Cancel</button
+          ><button
+            class="button button-primary"
+            id="saveRecordButton"
+            value="default"
+          >
+            Save record
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog">
+      <form method="dialog" class="confirm-form">
+        <p class="kicker">Confirm reset</p>
+        <h2>Restore the photographed roster?</h2>
+        <p>
+          This removes edits and added vehicles stored in this browser. The
+          source list of 50 vehicles will be restored.
+        </p>
+        <div class="dialog-actions">
+          <button class="button button-quiet" value="cancel">Keep edits</button
+          ><button class="button button-danger" value="confirm">
+            Reset roster
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
